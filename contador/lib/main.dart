@@ -9,22 +9,35 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
+    return MaterialApp(
       debugShowCheckedModeBanner: false,
       home: HomePage(),
     );
   }
 }
 
-class HomePage extends StatelessWidget {
+class HomePage extends StatefulWidget {
   const HomePage({Key? key}) : super(key: key);
 
+  @override
+  State<HomePage> createState() => _HomePageState();
+}
+
+class _HomePageState extends State<HomePage> {
+  int count = 0;
+
   void decrement() {
-    print('Decrement');
+    setState(() {
+      count--;
+    });
+    print(count);
   }
 
   void increment() {
-    print('Increment');
+    setState(() {
+      count++;
+    });
+    print(count);
   }
 
   @override
@@ -33,11 +46,10 @@ class HomePage extends StatelessWidget {
       backgroundColor: Colors.red,
       body: Container(
         decoration: const BoxDecoration(
-          image: DecorationImage(
-            image: AssetImage('assets/images/image.jpg'),
-            fit: BoxFit.cover,
-          )
-        ),
+            image: DecorationImage(
+          image: AssetImage('assets/images/image.jpg'),
+          fit: BoxFit.cover,
+        )),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
@@ -49,11 +61,12 @@ class HomePage extends StatelessWidget {
                 fontWeight: FontWeight.w800,
               ),
             ),
-            const Padding( //espaçamento no widget text
-              padding: EdgeInsets.all(40),
-              child: Text (
-                '0',
-                style: TextStyle(
+            Padding(
+              //espaçamento no widget text
+              padding: const EdgeInsets.all(40),
+              child: Text(
+                count.toString(),
+                style: const TextStyle(
                   fontSize: 100,
                   color: Colors.white,
                 ),
