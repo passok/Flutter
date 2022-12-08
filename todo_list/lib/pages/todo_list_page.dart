@@ -37,6 +37,23 @@ class TodoListPage extends StatelessWidget {
                   ),
                 ],
               ),
+              ListView(
+                shrinkWrap: true, //deixa o listview no maior tamanho possivel
+                children: [
+                  Container(
+                    color: Colors.red,
+                    height: 50,
+                  ),
+                  Container(
+                    color: Colors.yellow,
+                    height: 50,
+                  ),
+                  Container(
+                    color: Colors.green,
+                    height: 50,
+                  ),
+                ],
+              ),
               SizedBox(height: 16),
               Row(
                 children: [
