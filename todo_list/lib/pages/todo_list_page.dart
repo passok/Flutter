@@ -40,17 +40,21 @@ class TodoListPage extends StatelessWidget {
               ListView(
                 shrinkWrap: true, //deixa o listview no maior tamanho possivel
                 children: [
-                  Container(
-                    color: Colors.red,
-                    height: 50,
+                  ListTile(
+                    title: Text('Tarefa1'),
+                    subtitle: Text('20/11/2022'),
+                    leading: Icon(Icons.save, size: 30),
+                    onTap: (){
+                      print('Tarefa 1');
+                    },
                   ),
-                  Container(
-                    color: Colors.yellow,
-                    height: 50,
-                  ),
-                  Container(
-                    color: Colors.green,
-                    height: 50,
+                  ListTile(
+                    title: Text('Tarefa2'),
+                    subtitle: Text('20/11/2022'),
+                    leading: Icon(Icons.person, size: 30),
+                    onTap: (){
+                      print('Tarefa 2');
+                    },
                   ),
                 ],
               ),
@@ -71,7 +75,7 @@ class TodoListPage extends StatelessWidget {
                     child: Text('Limpar tudo'),
                   ),
                 ],
-              )
+              ),
             ],
           ),
         ),
