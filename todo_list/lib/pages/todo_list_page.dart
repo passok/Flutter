@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:todo_list/widgets/todo_list_item.dart';
 
 class TodoListPage extends StatefulWidget {
   TodoListPage({Key? key}) : super(key: key);
@@ -53,17 +54,13 @@ class _TodoListPageState extends State<TodoListPage> {
                   ),
                 ],
               ),
+              SizedBox(height: 16),
               Flexible( //não permite que a listview ultrapasse o tamanho maximo
                 child: ListView(
                   shrinkWrap: true, //deixa o listview no maior tamanho possivel
                   children: [
                     for(String todo in todos) //para cada tarefa que está na lista
-                    ListTile(
-                      title: Text(todo), //apresenta a tarefa no listview
-                      onTap: (){
-                        print('Tarefa: $todo');
-                      },
-                    ),
+                      TodoListItem(),
                   ],
                 ),
               ),
