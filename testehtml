@@ -1,0 +1,346 @@
+<div class="form-group col-md-12 mt-3" [formGroup]="formulario">
+    <div *ngIf="(situacaoAberta && colunaEditarExcluir) || edicao">
+        <div class="row">
+            <div class="form-group col-md-10" [ngClass]="aplicaCssErro('kit', formulario)">
+                <sal-consulta-select [formulario]="formulario" [placeholder]="'Informe o Kit'"
+                    nomeCampo="kit" [consultaSelect]="consultaSelectKit" [preCarregado]="false"
+                    nomeApresentacao="Kit">
+                </sal-consulta-select>
+            </div>
+            <div class="form-group col-md-2" [ngClass]="aplicaCssErro('quantidade', formulario)">
+                <label>Quantidade</label>
+                <input id="txtQuantidade" name="txtQuantidade" type="number" class="form-control"
+                    formControlName="quantidade">
+                <sal-mensagem-validacao campo="quantidade" [formulario]="formulario" nomeCampo="Quantidade">
+                </sal-mensagem-validacao>
+            </div>
+        </div>
+        <div class="row">
+            <div [class]="index >= 0 ? 'form-group col-md-8' : 'form-group col-md-12'">
+                <label for="txtObservacao">Observação</label>
+                <textarea name="txtObservacao" id="txtObservacao" rows="1" formControlName="observacao"
+                    class="col-md-12 form-control" salUppercase></textarea>
+            </div>
+            <div class="form-group col-md-4" *ngIf="index >= 0">
+                <label for="txtSituacaoKit">Situação</label>
+                <input id="txtSituacaoKit" name="txtSituacaoKit" type="text" class="form-control"
+                    [value]="SituacaoRequisicao[this.formulario?.controls?.situacaoRequisicaoKit?.value]" disabled>
+            </div>
+        </div>
+        <div class="row" *ngIf="situacaoAberta && colunaEditarExcluir">
+            <div class="form-group col-md-12 mt-3 text-right">
+                <button mat-raised-button class="btn btn-success" (click)="adicionar()" *ngIf="index < 0" [disabled]="desabilitaAdicionar">
+                    <span class="btn-label">
+                        <mat-icon svgIcon="arrow-down"></mat-icon>
+                    </span>
+                    Adicionar
+                </button>
+                <button mat-raised-button class="btn btn-danger" (click)="cancelar()">
+                    <span class="btn-label">
+                        <mat-icon svgIcon="close"></mat-icon>
+                    </span>
+                    Cancelar
+                </button>
+            </div>
+        </div>
+    </div>
+        <div class="row" *ngIf="!rotinaAtendimento">
+            <div class="form-group col-md-12 mt-3">
+                <sal-modal-datatable
+                    [tituloCard]="'Kits registrados na requisição'"
+                    [abreModal]="false" [habilitaAdicionar]="false" [configuracaoTable]="configuracaoTable"
+                    (onEventoEditar)="abrirModalEdicao(modalEdicao, $event)" (onEventoExcluir)="excluirModal($event)"
+                    (onEventoVisualizar)="visualizarModal($event)" (onEventoEditarColuna)="onEventoEditarColuna($event)"
+                    [itens]="itens">
+                </sal-modal-datatable>
+            </div>
+        </div>
+        <div class="row" *ngIf="rotinaAtendimento">
+            <div class="form-group col-md-12 mt-3">
+                <div class="card">
+                    <div class="card-header">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <h5>Kits registrados na requisição</h5>
+                            </div>
+                        </div>
+                        <div class="form-group col-md-12 mt-3" *ngIf="!atendida && !situacaoAguardandoAtendimento">
+                            <div class="row">
+                                <div class="form-group col-md-2">
+                                    <label>Código Barra</label>
+                                    <input #codigoBarraFocus id="codigoBarra" name="codigoBarra" type="text"
+                                        class="form-control"
+                                        (change)="buscarCodigoBarra(this.formulario.get('codigoBarra'))"
+                                        formControlName="codigoBarra">
+                                </div>
+                                <div class = "form-group col-md-10">
+                                    <label>Kit</label>
+                                    <sal-consulta-select 
+                                    [consultaSelect]="consultaSelectKitMontagem"
+                                    [nomeCampo]="'kitMontagem'"
+                                    [formulario]="formulario"
+                                    [placeholder]="'Informe o Kit'"
+                                ></sal-consulta-select>
+                                </div>    
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="material-datatables">
+                            <table id="configuracaoTable.idTable" class="table table-striped table-no-bordered table-hover"
+                            cellspacing="0" width="100%" style="width: 100%;">
+                            <mat-accordion>
+                                <ng-container *ngFor="let item of itens.controls | filtro: 'situacaoRequisicaoKit' : '!=' : 'REPROVADA'; let i = index">
+                                    <thead>
+                                        <th style="display: flex; flex-direction: column; align-items: center; border-bottom: none; "
+                                        >
+                                        </th>
+                                        <th style="text-align: left; width: 10%;">Ações</th> 
+                                        <th style="text-align: left; width: 10%;">Kit</th>
+                                        <th style="text-align: left; width: 10%;">Requisitada</th>
+                                        <th style="text-align: left; width: 10%;">Atendida</th>
+                                        <th style="text-align: left; width: 10%;">Pendente</th>
+                                        <th style="text-align: left; width: 10%;"></th>
+                                        <th style="text-align: center; width: 10%;">Atender</th>
+                                        <th style="text-align: center; width: 30%;">Situação</th>  
+                                    </thead> 
+                                    <mat-expansion-panel>
+                                        <mat-expansion-panel-header>
+                                            <mat-panel-description style="display: block;">
+                                                <div class="row">
+                                                    <div class="form-group col-md-1 form-inline text-left">
+                                                        <a matTooltip="Visualizar" class="btn btn-link btn-info btn-just-icon like"
+                                                        (click)="visualizarAtendimentoKit(i); $event.stopPropagation()">
+                                                            <mat-icon svgIcon="magnify"></mat-icon>
+                                                        </a>
+                                                    </div>
+                                                    <div class="text-center" style="width: 80px; vertical-align: middle; font-size: 12px;"> {{ item?.get('kit')?.value?.descricao }} </div>                                                    
+                                                    <div class="text-center" style="width: 150px; vertical-align: middle; font-size: 12px; padding-left: 8%;"> {{ item?.get('quantidadeAprovada').value }} </div>                                                    
+                                                    <div class="text-center" style="width: 150px; vertical-align: middle; font-size: 12px; padding-left: 5%;"> {{ item?.get('quantidadeAtendida').value }} </div>
+                                                    <div class="text-center" style="width: 150px; vertical-align: middle; font-size: 12px; padding-left: 3%;"> {{ item?.get('quantidadePendente').value }} </div>                                                    
+                                                    <div class="text-center" style="width: 150px; vertical-align: middle; font-size: 12px; padding-left: 3%;">
+                                                    </div>
+                                                    <div class="col-md-1 text-center" style="text-align: center; vertical-align: middle; font-size: 12px; padding-left: 7%">
+                                                        <a class="btn btn-link btn-success btn-just-icon like" (click)="$event.stopPropagation()">
+                                                            <ng-container *ngIf="(item.get('situacaoRequisicaoKit').value == 'ATENDIDA' || situacaoAguardandoAtendimento || atendida); else notAttended">
+                                                                <div style="width: 24px; height: 24px;"></div>
+                                                            </ng-container>
+                                                            <ng-template #notAttended>
+                                                                <mat-icon svgIcon="check" matTooltip="Atender todos" (click)="atenderKit(item);"></mat-icon>
+                                                            </ng-template>
+                                                        </a>
+                                                    </div>
+                                                    <div class="text-center" style="width: 435px; vertical-align: middle; font-size: 12px; padding-left: 7%;"> {{ item?.get('situacaoRequisicaoKit').value }} </div>    
+                                                </div>
+                                            </mat-panel-description>
+                                        </mat-expansion-panel-header> 
+
+                                        <ng-container *ngFor="let subitem of item.get('requisicaoKitItens').controls | filtro: 'situacaoRequisicaoKit' : '!=' : 'REPROVADA'; let j = index">
+                                            <mat-expansion-panel [expanded]="true" style="margin-bottom: 10px;">
+                                                <div class="row align-items-center" [attr.data-index]="j" [style]="returnColor(item?.situacaoRequisicaoKit)" formGroupName="kitMontagem">
+                                                    <!-- Sub Kit -->
+                                                    <div class="col">
+                                                        <label>Sub Kit</label>
+                                                        <input class="form-control" type="text" 
+                                                        [value]="item?.get('kit')?.value?.descricao"
+                                                        [ngStyle]="subitem.get('situacaoRequisicaoKitItens').value == 'ATENDIDA' ? {'color': 'green'} : {'color': 'red'}" 
+                                                        disabled>
+                                                    </div>
+                                                    <!-- Select Kit Montagem -->
+                                                    <div class = "form-group col-md-5" >
+                                                        <label>Kit</label>
+                                                        <sal-consulta-select 
+                                                            *ngIf="subitem.get('situacaoRequisicaoKitItens').value != 'ATENDIDA' && !situacaoAguardandoAtendimento"
+                                                            [consultaSelect]="consultaSelectKitMontagem"
+                                                            [nomeCampo]="'kitMontagem'"
+                                                            [formulario]="formularioKitMontagem"
+                                                            [placeholder]="'Informe o Kit'"
+                                                            (onChange)="verificarKitMontagemDuplicado($event, subitem, i, j)">
+                                                        </sal-consulta-select>
+                                                        <input 
+                                                            *ngIf="subitem.get('situacaoRequisicaoKitItens').value == 'ATENDIDA' || situacaoAguardandoAtendimento"
+                                                            class="form-control" 
+                                                            type="text" 
+                                                            [value]="subitem?.get('kitMontagem')?.value?.descricaoPesquisa"
+                                                            disabled>
+                                                    </div>
+                                                    
+                                                    <!-- Botões -->
+                                                    <div class="col" >
+                                                        <div style="text-align: center;">
+                                                            <button mat-raised-button class="btn btn-outline-success" style="margin-right: 5px;"
+                                                                [disabled]="atendida || situacaoAguardandoAtendimento || subitem.quantidadePendente == 0 || subitem.get('situacaoRequisicaoKitItens').value == 'ATENDIDA'"
+                                                                (click)="atenderKit(item, j)"
+                                                                matTooltip="Atender Kit">
+                                                                <mat-icon svgIcon="check-bold"></mat-icon>
+                                                            </button>
+                                                            <button mat-raised-button class="btn btn-outline-danger"
+                                                                *ngIf="subitem.get('situacaoRequisicaoKitItens').value != 'ATENDIDA'"
+                                                                [disabled]="atendida || situacaoAguardandoAtendimento || subitem.get('situacaoRequisicaoKitItens').value == 'ATENDIDA'"
+                                                                matTooltip="Não atender kit">
+                                                                <mat-icon svgIcon="close"></mat-icon>
+                                                            </button>
+                                                            <button mat-raised-button class="btn btn-outline-warning" 
+                                                                *ngIf="!atendida && !situacaoAguardandoAtendimento && subitem.get('situacaoRequisicaoKitItens').value == 'ATENDIDA'"
+                                                                matTooltip="Estornar atendimento" (click)="estornarKit(subitem?.get('id').value)">
+                                                                <mat-icon svgIcon="sync"></mat-icon>
+                                                            </button>
+                                                        </div>   
+                                                    </div>
+                                                    <!-- Situação -->
+                                                    <div class="col text-right" style="vertical-align: middle; font-size: 12px; margin-right: 120px;"> 
+                                                        {{ subitem?.get('situacaoRequisicaoKitItens').value }} 
+                                                    </div>                                                    
+                                                </div>
+                                            </mat-expansion-panel>
+                                        </ng-container>                                        
+
+                                    </mat-expansion-panel>
+                                </ng-container>
+                            </mat-accordion>
+                        </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <ng-template #modalEdicao let-modal>
+            <div class="modal-header">
+                <h4 class="modal-title">Editar</h4>
+                <button type="button" class="close" aria-label="Close" (click)="modal.dismiss()">
+                    <span aria-hidden="true">×</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div formularioEdicao class="col-md-12">
+                    <form [formGroup]="formularioEdicao">
+                        <div class="col-md-12">
+                            <div class="row">
+                                <div class="form-group col-md-10">
+                                    <label>Kit</label>
+                                    <input id="txtKit" name="txtKit" type="text" class="form-control"
+                                        [value]="this.formularioEdicao.controls.kit.value.descricaoPesquisa"
+                                        disabled>
+                                </div>
+                                <div class="form-group col-md-2" [ngClass]="aplicaCssErro('quantidade', formularioEdicao)">
+                                    <label>Quantidade</label>
+                                    <input id="txtQuantidade" name="txtQuantidade" type="number" class="form-control"
+                                        formControlName="quantidade" (keydown.enter)="onKeyDownQtdEditar(modal)">
+                                    <sal-mensagem-validacao campo="quantidade" [formulario]="formularioEdicao"
+                                        nomeCampo="Quantidade">
+                                    </sal-mensagem-validacao>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="form-group col-md-8">
+                                    <label for="txtObservacao">Observação</label>
+                                    <textarea name="txtObservacao" id="txtObservacao" rows="1" formControlName="observacao"
+                                        class="col-md-12 form-control" salUppercase></textarea>
+                                </div>
+                                <div class="form-group col-md-4">
+                                    <label for="txtSituacaoItem">Situação</label>
+                                    <input id="txtSituacaoItem" name="txtSituacaoItem" type="text" class="form-control"
+                                        [value]="this.formularioEdicao?.controls?.kitMontagem?.fechado?.value"
+                                        disabled>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button mat-raised-button class="btn btn-success ml-2" (click)="alterar(); modal.close()"
+                    [disabled]="formularioEdicao.invalid">
+                    <span class="btn-label">
+                        <mat-icon svgIcon="arrow-down"></mat-icon>
+                    </span>
+                    Alterar
+                </button>
+                <button mat-raised-button class="btn btn-danger ml-2" (click)="modal.close()">
+                    <span class="btn-label">
+                        <mat-icon svgIcon="close"></mat-icon>
+                    </span>
+                    Cancelar
+                </button>
+            </div>
+        </ng-template>
+</div>
+<ng-template #modalKitMontagem let-modal>
+    <div class="modal-header">
+        <h4 class="modal-title" id="modal-basic-title">
+          Atender Produtos do Kit
+        </h4><br>
+      <button type="button" class="close" aria-label="Close" (click)="modal.dismiss()">
+        <span aria-hidden="true">×</span>
+      </button>
+    </div>
+    <div class="modal-body">
+        <div class="card-body">
+            <div class="row">
+                <div class="form-group col-md-6">
+                    <mat-radio-group class="example-radio-group"  >
+                        <mat-radio-button class="example-radio-button" value="CONSUMO"><strong>CONSUMO</strong> </mat-radio-button>
+                        <mat-radio-button class="example-radio-button ml-5" value="DEVOLUCAO'"><strong>DEVOLUÇÃO</strong></mat-radio-button>
+                    </mat-radio-group>
+                </div>
+                <div class="form-group col-md-6" style="text-align: right;" >
+                    <button mat-raised-button class="btn btn-warning ml-2" >
+                        <span class="btn-label">
+                            <mat-icon svgIcon="content-copy"></mat-icon>
+                        </span>
+                        Copiar Quantidade para 
+                    </button>
+                </div>
+            </div>
+            <br>
+            <br>
+            <div class="material-datatables">
+                <table id="info" class="table table-striped table-no-bordered table-hover" cellspacing="0" width="100%" style="width: 100%;">
+                    <thead>
+                        <th style="text-align: left;">Produto</th>
+                        <th style="text-align: left;">Lote</th>
+                        <th style="text-align: center;">Data Validade</th>
+                        <th style="text-align: center;">Quantidade</th>
+                        <th style="text-align: center;">Atender</th>
+                    </thead>
+                    <tbody>
+                        <tr *ngFor="let item of this.kitMontagem.kitMontagemProdutos; let i = index">
+
+                            <td style="text-align: left;" *ngIf="item.quantidade > 0">
+                                <mat-icon class="btn btn-link btn-danger btn-just-icon like"
+                                    svgIcon="alpha-o-circle-outline"
+                                    matTooltip="Obrigatório no Kit"
+                                    *ngIf="item.obrigatorio"
+                                    style="cursor: default;">
+                                </mat-icon>
+                                <mat-icon class="btn btn-link btn-warning btn-just-icon like"
+                                    svgIcon="alpha-a-circle-outline"
+                                    matTooltip="Avulso no Kit"
+                                    *ngIf="item.avulso"
+                                    style="cursor: default;">
+                                </mat-icon>
+                                <mat-icon class="btn btn-link btn-success btn-just-icon like"
+                                    svgIcon="alpha-l-circle-outline"
+                                    matTooltip="Não obrigatório no Kit"
+                                    *ngIf="!item.obrigatorio && !item.avulso"
+                                    style="cursor: default;">
+                                </mat-icon>
+                                {{ item.produtoUnidadeMedidaEmpresa.descricaoPesquisa }}
+                            </td>
+                            <td style="text-align: left;" *ngIf="item.quantidade > 0">{{ item.produtoLoteValidade != null ? item.produtoLoteValidade.lote : '' }}
+                            <td style="text-align: center;" *ngIf="item.quantidade > 0">{{ item.produtoLoteValidade == null ? '' : item.produtoLoteValidade.dataValidade | date: 'dd/MM/yyyy'}} 
+                            <td style="text-align: center;" *ngIf="item.quantidade > 0">{{ item.quantidade }}  
+
+                            <td style="text-align: center; vertical-align: middle;" *ngIf="item.quantidade > 0">
+                                <input type="number" id="id-{{i}}" name="name-{{i}}" [value]="item.quantidadeMovimentar"
+                                (change)="setQuantidadeAtender(i, $event.target.value)"
+                                    class="form-control input-edit-enabled" 
+                                    style="text-align: center;">
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+  </ng-template>
